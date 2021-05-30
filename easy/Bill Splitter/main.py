@@ -8,5 +8,9 @@ else:
     for i in range(number):
         names.append(input())
     print()
-    guests = dict.fromkeys(names, 0)
+    print("Enter the total bill value: ")
+    money = int(input())
+    money = round(money / number, 2)
+    guests = dict.fromkeys(names, money)
+    print()
     print(guests)
