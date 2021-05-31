@@ -1,4 +1,3 @@
-coins = input()
-print(f'I have {coins} conicoins.')
-print(f'{coins} conicoins cost {int(coins)*100} dollars.')
-print('I am rich! Yippee!')
+conicoins = int(input("Please, enter the number of conicoins you have: "))
+exchange_rate = float(input("Please, enter the exchange rate: "))
+print('The total amount of dollars:', conicoins * exchange_rate)
