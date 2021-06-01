@@ -1,54 +1,62 @@
-import math
+from math import log, ceil, trunc
+import sys
 
-print("""
-What do you want to calculate?
-type "n" for number of monthly payments,
-type "a" for annuity monthly payment amount,
-type "p" for loan principal:
-""")
-action = input()
-if action == 'n':
-    print('Enter the loan principal:')
-    loan_principal = int(input())
-    print("Enter the monthly payment:")
-    payment = int(input())
-    print("Enter the loan interest:")
-    loan_interest = float(input())
-    i = loan_interest / 1200
-    n = math.log(payment/(payment - i * loan_principal), 1 + i)
-    n = math.ceil(n)
-    print(n)
-    years = n // 12
-    months = n % 12
-    mask_ans = ""
-    if years == 1:
-        mask_ans = mask_ans + "1 year"
-    elif years > 0:
-        mask_ans = mask_ans + f'{years} years '
-    if years > 0 and months > 0:
-        mask_ans = mask_ans + 'and '
-    if months == 1:
-        mask_ans = mask_ans + "1 month"
-    elif months > 0:
-        mask_ans = mask_ans + f'{months} months '
-    print(f'It will take {mask_ans}to repay this loan!')
-elif action == 'a':
-    print('Enter the loan principal:')
-    loan_principal = int(input())
-    print("Enter the number of periods")
-    months = int(input())
-    print("Enter the loan interest:")
-    loan_interest = float(input())
-    i = loan_interest / 1200
-    a = loan_principal * ((i * (i + 1) ** months) / ((1 + i) ** months - 1))
-    print(f'Your monthly payment = {math.ceil(a)}!')
-elif action == 'p':
-    print('Enter the annuity payment::')
-    annuity_principal = float(input())
-    print("Enter the number of periods")
-    months = int(input())
-    print("Enter the loan interest:")
-    loan_interest = float(input())
-    i = loan_interest / 1200
-    ans = annuity_principal / (((i * (1 + i) ** months)) / ((1 + i) ** months - 1))
-    print(f'Your loan principal = {math.ceil(ans)}!')
+args, type_, payment, principal, interest, periods = sys.argv, " ", 0, 0, 0, 0
+for arg in args:
+    if arg.startswith("--type"):
+        type_ = arg[7:]
+    if arg.startswith("--payment"):
+        payment = int(arg[10:])
+    if arg.startswith("--principal"):
+        principal = int(arg[12:])
+    if arg.startswith("--interest"):
+        interest = float(arg[11:])
+    if arg.startswith("--periods"):
+        periods = int(arg[10:])
+if type_ == "diff":
+    if payment != 0 or principal == 0 or periods == 0 or interest == 0:
+        print("Incorrect parameters")
+    else:
+        deposits = []
+        for j in range(1, periods + 1):
+            i = interest / 12 / 100
+            money = ceil(
+                principal / periods + i * (principal - (principal * (j - 1) / periods))
+            )
+            deposits.append(money)
+            print(f"Month {j}: paid out {money}")
+        print()
+        print("Overpayment =", sum(deposits) - principal)
+if type_ == "annuity":
+    if all([principal, periods, interest]):
+        i = interest / 12 / 100
+        a = ceil(principal * ((i * (i + 1) ** periods) / ((i + 1) ** periods - 1)))
+        print("Your annuity payment =", a)
+        print("Overpayment =", a * periods - principal)
+    elif all([payment, periods, interest]):
+        i = interest / 12 / 100
+        a = trunc(payment / (i * (i + 1) ** periods / ((i + 1) ** periods - 1)))
+        print(f"Your loan principal = {a}!",)
+        print("Overpayment =", payment * periods - a)
+    elif all([payment, principal, interest]):
+        i = interest / 12 / 100
+        n = ceil(log(payment / (payment - i * principal), i + 1))
+        years = n // 12
+        months = n % 12
+        mask_ans = ""
+        if years == 1:
+            mask_ans = mask_ans + "1 year"
+        elif years > 0:
+            mask_ans = mask_ans + f'{years} years '
+        if years > 0 and months > 0:
+            mask_ans = mask_ans + 'and '
+        if months == 1:
+            mask_ans = mask_ans + "1 month"
+        elif months > 0:
+            mask_ans = mask_ans + f'{months} months '
+        print(f"You need {mask_ans} to repay this credit!")
+        print(f"Overpayment = {n * payment - principal}")
+    else:
+        print("Incorrect parameters")
+else:
+    print("Incorrect parameters")
